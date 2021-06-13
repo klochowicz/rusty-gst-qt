@@ -1,0 +1,9 @@
+[package]
+name = "rusty-gst-qt"
+version = "0.1.0"
+authors = ["Mariusz Klochowicz <mariusz.klochowicz@acaciasystems.com.au>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
