@@ -5,8 +5,9 @@
 Experiments around usage of GStreamer and Qt in Rust. both are extremely powerful frameworks, used by me at my day job with C++.
 This repo is my attempt to solve a question I was posing for a while- is Rust ready for creating large-scale desktop applications? Although more work is needed, preliminary results are exciting and encourage further exploration.
 
-
-Tested on Ubuntu 20.04, with GStreamer 1.16 & Qt 5.12.
+Tested on:
+- Ubuntu 20.04, with GStreamer 1.16 & Qt 5.12.
+- macOS 11.4, with GStreamer 1.18 & Qt 5.15.
 
 ## Functionality 
 For now, the demo involves 2 processes;
@@ -15,6 +16,9 @@ For now, the demo involves 2 processes;
 
 The demo allows selecting a video file to playback, starting the process, and controlling the playback state (playing/paused). A notification from child process indicates whether the media is currently playing. 
 GUI is extremely basic, no effort was made so far to make it pretty. 
+
+Launching the demo:
+`cargo run --bin rusty-gst-qt`
 
 ## Roadmap
 - [ ] use proper IPC (ipc-channel, or tokio components) instead of OSC
