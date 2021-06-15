@@ -58,6 +58,10 @@ async fn message_handler(loop_: glib::MainLoop, bus: gstreamer::Bus) {
         match msg.view() {
             MessageView::Eos(..) => {
                 println!("Received EOS. Exiting the main loop.");
+                socket
+                    .send(("/state/eos", (1i32,)))
+                    .await
+                    .expect("Can't send data over socket");
                 loop_.quit();
             }
             MessageView::StateChanged(state) => {
@@ -92,6 +96,10 @@ async fn message_handler(loop_: glib::MainLoop, bus: gstreamer::Bus) {
                     err.get_error(),
                     err.get_debug()
                 );
+                socket
+                    .send(("/state/error", (1i32,)))
+                    .await
+                    .expect("Can't send data over socket");
                 loop_.quit();
             }
             _ => (),

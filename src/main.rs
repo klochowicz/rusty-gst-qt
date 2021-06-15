@@ -75,9 +75,10 @@ impl LaunchGui {
     }
 
     fn check_playing(&mut self) {
-        let data = PLAYING.lock().unwrap();
-        if self.playing != *data {
-            self.playing = *data;
+        let state_data = STATE.lock().unwrap();
+        let playing = is_playing(&*state_data);
+        if self.playing != playing {
+            self.playing = playing;
             self.playing_changed();
         }
     }
@@ -120,12 +121,20 @@ async fn command_handler() {
             OscPacket::Bundle(_) => {}
             OscPacket::Message(message) => match message.as_tuple() {
                 ("/state/playing", _) => {
-                    let mut data = PLAYING.lock().unwrap();
-                    *data = true;
+                    let mut state_data = STATE.lock().unwrap();
+                    *state_data = PipelineState::Playing;
                 }
                 ("/state/paused", _) => {
-                    let mut data = PLAYING.lock().unwrap();
-                    *data = false;
+                    let mut state_data = STATE.lock().unwrap();
+                    *state_data = PipelineState::Paused;
+                }
+                ("/state/error", _) => {
+                    let mut state_data = STATE.lock().unwrap();
+                    *state_data = PipelineState::Error;
+                }
+                ("/state/eos", _) => {
+                    let mut state_data = STATE.lock().unwrap();
+                    *state_data = PipelineState::EndOfStream;
                 }
                 _ => {
                     eprintln!("Received unrecognised OSC message: {:?}", message);
@@ -135,9 +144,22 @@ async fn command_handler() {
     }
 }
 
-// FIXME: Pass the PLAYING state into async function instead of polling for changes
+#[derive(PartialEq, Eq, Debug)]
+enum PipelineState {
+    Unknown,
+    Playing,
+    Paused,
+    Error,
+    EndOfStream,
+}
+
+fn is_playing(state: &PipelineState) -> bool {
+    *state == PipelineState::Playing
+}
+
+// FIXME: Find a way of using STATE inside Qt object instead of polling
 lazy_static! {
-    static ref PLAYING: Arc<Mutex<bool>> = Arc::new(Mutex::new(false));
+    static ref STATE: Arc<Mutex<PipelineState>> = Arc::new(Mutex::new(PipelineState::Unknown));
 }
 
 fn main() {
