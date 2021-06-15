@@ -944,6 +944,7 @@ dependencies = [
  "futures",
  "glib",
  "gstreamer",
+ "lazy_static",
  "qmetaobject",
  "serde",
 ]

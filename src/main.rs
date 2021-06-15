@@ -1,9 +1,12 @@
-// use async_std::task::JoinHandle;
+#[macro_use]
+extern crate lazy_static;
+
 use async_osc::{prelude::*, Error, OscPacket, OscSocket};
 use async_std::stream::StreamExt;
 use core::panic;
 use cstr::cstr;
 use std::process::{Child, Command, Stdio};
+use std::sync::{Arc, Mutex};
 
 use qmetaobject::prelude::*;
 
@@ -72,11 +75,10 @@ impl LaunchGui {
     }
 
     fn check_playing(&mut self) {
-        unsafe {
-            if self.playing != PLAYING {
-                self.playing = PLAYING;
-                self.playing_changed();
-            }
+        let data = PLAYING.lock().unwrap();
+        if self.playing != *data {
+            self.playing = *data;
+            self.playing_changed();
         }
     }
 
@@ -117,12 +119,14 @@ async fn command_handler() {
         match packet {
             OscPacket::Bundle(_) => {}
             OscPacket::Message(message) => match message.as_tuple() {
-                ("/state/playing", _) => unsafe {
-                    PLAYING = true;
-                },
-                ("/state/paused", _) => unsafe {
-                    PLAYING = false;
-                },
+                ("/state/playing", _) => {
+                    let mut data = PLAYING.lock().unwrap();
+                    *data = true;
+                }
+                ("/state/paused", _) => {
+                    let mut data = PLAYING.lock().unwrap();
+                    *data = false;
+                }
                 _ => {
                     eprintln!("Received unrecognised OSC message: {:?}", message);
                 }
@@ -131,13 +135,10 @@ async fn command_handler() {
     }
 }
 
-/// A Qt object used to relay from async rust code to QML
-// FIXME: A nasty hack with sharing state (couldn't define async task from
-// within the Qt object nor could I share a RefCell into the async task, as it
-// demanded static lifetime )
-// It is only meant to be written from one place at a time. Even if read got a
-// stale value, it will be re-polled soon afterwards.
-static mut PLAYING: bool = false;
+// FIXME: Pass the PLAYING state into async function instead of polling for changes
+lazy_static! {
+    static ref PLAYING: Arc<Mutex<bool>> = Arc::new(Mutex::new(false));
+}
 
 fn main() {
     qmetaobject::future::execute_async(command_handler());

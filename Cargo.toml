@@ -3,16 +3,16 @@ name = "rusty-gst-qt"
 version = "0.1.0"
 authors = ["Mariusz Klochowicz <mariusz@klochowiczcom>"]
 edition = "2018"
-
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-gstreamer = "0.16.7"
-glib = "0.10"
-qmetaobject = "0.2.1"
+async-osc = "0.2.0"
+async-std = "1.9.0"
+clap = "3.0.0-beta.2"
 cstr = "0.2"
 futures = "0.3.15"
-async-std = "1.9.0"
+glib = "0.10"
+gstreamer = "0.16.7"
+lazy_static = "1.4.0"
+qmetaobject = "0.2.1"
 serde = { version = "1.0", features = ["derive"] }
-async-osc = "0.2.0"
-clap = "3.0.0-beta.2"
